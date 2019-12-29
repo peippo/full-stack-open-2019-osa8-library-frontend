@@ -1,24 +1,20 @@
 import React, { useState } from "react";
 
-const NewBook = props => {
+const NewBook = ({ addBook, show }) => {
 	const [title, setTitle] = useState("");
-	const [author, setAuhtor] = useState("");
+	const [author, setAuthor] = useState("");
 	const [published, setPublished] = useState("");
 	const [genre, setGenre] = useState("");
 	const [genres, setGenres] = useState([]);
 
-	if (!props.show) {
+	if (!show) {
 		return null;
 	}
 
-	const submit = async e => {
-		e.preventDefault();
-
-		console.log("add book...");
-
+	const clearFields = () => {
 		setTitle("");
 		setPublished("");
-		setAuhtor("");
+		setAuthor("");
 		setGenres([]);
 		setGenre("");
 	};
@@ -30,19 +26,29 @@ const NewBook = props => {
 
 	return (
 		<div>
-			<form onSubmit={submit}>
+			<form
+				onSubmit={e => {
+					e.preventDefault();
+					addBook({
+						variables: { title, published, author, genres }
+					});
+					clearFields();
+				}}
+			>
 				<div>
 					title
 					<input
 						value={title}
 						onChange={({ target }) => setTitle(target.value)}
+						required
 					/>
 				</div>
 				<div>
 					author
 					<input
 						value={author}
-						onChange={({ target }) => setAuhtor(target.value)}
+						onChange={({ target }) => setAuthor(target.value)}
+						required
 					/>
 				</div>
 				<div>
@@ -50,7 +56,10 @@ const NewBook = props => {
 					<input
 						type="number"
 						value={published}
-						onChange={({ target }) => setPublished(target.value)}
+						onChange={({ target }) =>
+							setPublished(parseInt(target.value))
+						}
+						required
 					/>
 				</div>
 				<div>

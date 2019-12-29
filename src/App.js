@@ -1,10 +1,26 @@
 import React, { useState } from "react";
+import { useQuery, useMutation } from "@apollo/react-hooks";
+import { ALL_BOOKS, ALL_AUTHORS, ADD_BOOK } from "./queries";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
 
 const App = () => {
 	const [page, setPage] = useState("authors");
+	const [errorMessage, setErrorMessage] = useState(null);
+	const handleError = error => {
+		setErrorMessage(error.message);
+		setTimeout(() => {
+			setErrorMessage(null);
+		}, 10000);
+	};
+
+	const allBooks = useQuery(ALL_BOOKS);
+	const allAuthors = useQuery(ALL_AUTHORS);
+	const [addBook] = useMutation(ADD_BOOK, {
+		onError: handleError,
+		refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
+	});
 
 	return (
 		<div>
@@ -14,11 +30,11 @@ const App = () => {
 				<button onClick={() => setPage("add")}>add book</button>
 			</div>
 
-			<Authors show={page === "authors"} />
+			{errorMessage && <div style={{ color: "red" }}>{errorMessage}</div>}
 
-			<Books show={page === "books"} />
-
-			<NewBook show={page === "add"} />
+			<Authors show={page === "authors"} result={allAuthors} />
+			<Books show={page === "books"} result={allBooks} />
+			<NewBook show={page === "add"} addBook={addBook} />
 		</div>
 	);
 };
