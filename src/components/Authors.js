@@ -1,9 +1,17 @@
-import React from "react";
+import React, { useState } from "react";
 
-const Authors = ({ result, show }) => {
+const Authors = ({ result, show, editAuthor }) => {
+	const [name, setName] = useState("");
+	const [born, setBorn] = useState("");
+
 	if (!show) {
 		return null;
 	}
+
+	const clearFields = () => {
+		setName("");
+		setBorn("");
+	};
 
 	if (result.loading) {
 		return <div>loading...</div>;
@@ -27,6 +35,38 @@ const Authors = ({ result, show }) => {
 						))}
 					</tbody>
 				</table>
+
+				<h3>Set author birthyear</h3>
+				<form
+					onSubmit={e => {
+						e.preventDefault();
+						editAuthor({
+							variables: { name, setBornTo: born }
+						});
+						clearFields();
+					}}
+				>
+					<div>
+						Author name
+						<input
+							value={name}
+							onChange={({ target }) => setName(target.value)}
+							required
+						/>
+					</div>
+					<div>
+						Born
+						<input
+							type="number"
+							value={born}
+							onChange={({ target }) =>
+								setBorn(parseInt(target.value))
+							}
+							required
+						/>
+					</div>
+					<button type="submit">Update author</button>
+				</form>
 			</div>
 		);
 	}
