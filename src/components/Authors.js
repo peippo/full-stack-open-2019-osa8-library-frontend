@@ -47,12 +47,17 @@ const Authors = ({ result, show, editAuthor }) => {
 					}}
 				>
 					<div>
-						Author name
-						<input
+						Author
+						<select
 							value={name}
-							onChange={({ target }) => setName(target.value)}
-							required
-						/>
+							onChange={event => setName(event.target.value)}
+						>
+							{result.data.allAuthors.map(author => (
+								<option key={author.id} value={author.name}>
+									{author.name}
+								</option>
+							))}
+						</select>
 					</div>
 					<div>
 						Born
