@@ -52,6 +52,9 @@ const Authors = ({ result, show, editAuthor }) => {
 							value={name}
 							onChange={event => setName(event.target.value)}
 						>
+							<option value="" disabled>
+								Select author
+							</option>
 							{result.data.allAuthors.map(author => (
 								<option key={author.id} value={author.name}>
 									{author.name}
@@ -70,7 +73,9 @@ const Authors = ({ result, show, editAuthor }) => {
 							required
 						/>
 					</div>
-					<button type="submit">Update author</button>
+					<button type="submit" disabled={!name}>
+						Update author
+					</button>
 				</form>
 			</div>
 		);
