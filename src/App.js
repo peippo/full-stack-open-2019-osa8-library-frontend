@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useApolloClient } from "@apollo/react-hooks";
 import {
 	LOGIN,
 	ALL_BOOKS,
 	ALL_AUTHORS,
 	ADD_BOOK,
-	EDIT_AUTHOR
+	EDIT_AUTHOR,
+	CURRENT_USER
 } from "./queries";
 import LoginForm from "./components/LoginForm";
 import Authors from "./components/Authors";
 import Books from "./components/Books";
 import NewBook from "./components/NewBook";
+import Recommendations from "./components/Recommendations";
 
 const App = () => {
 	const client = useApolloClient();
@@ -24,9 +26,13 @@ const App = () => {
 		}, 10000);
 	};
 
-	const [login] = useMutation(LOGIN, { onError: handleError });
 	const allBooks = useQuery(ALL_BOOKS);
 	const allAuthors = useQuery(ALL_AUTHORS);
+	const currentUser = useQuery(CURRENT_USER);
+	const [login] = useMutation(LOGIN, {
+		onError: handleError,
+		refetchQueries: [{ query: CURRENT_USER }]
+	});
 	const [addBook] = useMutation(ADD_BOOK, {
 		onError: handleError,
 		refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
@@ -35,6 +41,13 @@ const App = () => {
 		onError: handleError,
 		refetchQueries: [{ query: ALL_AUTHORS }]
 	});
+
+	useEffect(() => {
+		const savedToken = sessionStorage.getItem("library-user-token");
+		if (savedToken) {
+			setToken(savedToken);
+		}
+	}, [setToken]);
 
 	const handleLogout = () => {
 		setToken(null);
@@ -51,6 +64,9 @@ const App = () => {
 				{token && (
 					<>
 						<button onClick={() => setPage("add")}>add book</button>
+						<button onClick={() => setPage("recommendations")}>
+							recommendations
+						</button>
 						<button onClick={handleLogout}>Logout</button>
 					</>
 				)}
@@ -77,7 +93,16 @@ const App = () => {
 				/>
 			)}
 
-			{token && <NewBook show={page === "add"} addBook={addBook} />}
+			{token && (
+				<>
+					<NewBook show={page === "add"} addBook={addBook} />
+					<Recommendations
+						show={page === "recommendations"}
+						result={currentUser}
+						books={allBooks}
+					/>
+				</>
+			)}
 		</div>
 	);
 };

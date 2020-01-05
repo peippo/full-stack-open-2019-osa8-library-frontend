@@ -26,6 +26,7 @@ const NewBook = ({ addBook, show }) => {
 
 	return (
 		<div>
+			<h2>add new book</h2>
 			<form
 				onSubmit={e => {
 					e.preventDefault();

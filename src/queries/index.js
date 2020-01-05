@@ -1,13 +1,5 @@
 import { gql } from "apollo-boost";
 
-export const LOGIN = gql`
-	mutation login($username: String!, $password: String!) {
-		login(username: $username, password: $password) {
-			value
-		}
-	}
-`;
-
 export const ALL_AUTHORS = gql`
 	{
 		allAuthors {
@@ -29,6 +21,23 @@ export const ALL_BOOKS = gql`
 			published
 			id
 			genres
+		}
+	}
+`;
+
+export const CURRENT_USER = gql`
+	{
+		me {
+			username
+			favoriteGenre
+		}
+	}
+`;
+
+export const LOGIN = gql`
+	mutation login($username: String!, $password: String!) {
+		login(username: $username, password: $password) {
+			value
 		}
 	}
 `;
@@ -59,6 +68,15 @@ export const EDIT_AUTHOR = gql`
 		editAuthor(name: $name, setBornTo: $setBornTo) {
 			name
 			born
+		}
+	}
+`;
+
+export const EDIT_USER = gql`
+	mutation editUser($username: String!, $favoriteGenre: String!) {
+		editUser(username: $username, favoriteGenre: $favoriteGenre) {
+			username
+			favoriteGenre
 		}
 	}
 `;
