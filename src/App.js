@@ -41,6 +41,9 @@ const App = () => {
 	});
 	const [addBook] = useMutation(ADD_BOOK, {
 		onError: handleError,
+		update: (store, response) => {
+			updateCacheWith(response.data.addBook);
+		},
 		refetchQueries: [{ query: ALL_BOOKS }, { query: ALL_AUTHORS }]
 	});
 	const [editAuthor] = useMutation(EDIT_AUTHOR, {
@@ -48,15 +51,28 @@ const App = () => {
 		refetchQueries: [{ query: ALL_AUTHORS }]
 	});
 
+	const updateCacheWith = addedBook => {
+		const includedIn = (set, object) =>
+			set.map(p => p.id).includes(object.id);
+
+		const dataInStore = client.readQuery({ query: ALL_BOOKS });
+		if (!includedIn(dataInStore.allBooks, addedBook)) {
+			client.writeQuery({
+				query: ALL_BOOKS,
+				data: { allBooks: dataInStore.allBooks.concat(addedBook) }
+			});
+		}
+	};
+
 	useSubscription(BOOK_ADDED, {
 		onSubscriptionData: ({ subscriptionData }) => {
-			console.log(subscriptionData);
-			const { title } = subscriptionData.data.bookAdded;
-			const { name: authorName } =
-				subscriptionData.data.bookAdded?.author || "Unknown author";
+			const addedBook = subscriptionData.data.bookAdded;
+			const title = addedBook.title;
+			const authorName = addedBook?.author?.name || "Unknown author";
 			window.alert(
 				`Someone just added the book "${title}" by ${authorName}`
 			);
+			updateCacheWith(addedBook);
 		}
 	});
 
