@@ -1,12 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { useQuery, useMutation, useApolloClient } from "@apollo/react-hooks";
+import {
+	useQuery,
+	useMutation,
+	useSubscription,
+	useApolloClient
+} from "@apollo/react-hooks";
 import {
 	LOGIN,
 	ALL_BOOKS,
 	ALL_AUTHORS,
 	ADD_BOOK,
 	EDIT_AUTHOR,
-	CURRENT_USER
+	CURRENT_USER,
+	BOOK_ADDED
 } from "./queries";
 import LoginForm from "./components/LoginForm";
 import Authors from "./components/Authors";
@@ -40,6 +46,18 @@ const App = () => {
 	const [editAuthor] = useMutation(EDIT_AUTHOR, {
 		onError: handleError,
 		refetchQueries: [{ query: ALL_AUTHORS }]
+	});
+
+	useSubscription(BOOK_ADDED, {
+		onSubscriptionData: ({ subscriptionData }) => {
+			console.log(subscriptionData);
+			const { title } = subscriptionData.data.bookAdded;
+			const { name: authorName } =
+				subscriptionData.data.bookAdded?.author || "Unknown author";
+			window.alert(
+				`Someone just added the book "${title}" by ${authorName}`
+			);
+		}
 	});
 
 	useEffect(() => {

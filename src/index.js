@@ -1,15 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom";
+
 import { ApolloProvider } from "react-apollo";
-import App from "./App";
 import { ApolloClient } from "apollo-client";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { HttpLink } from "apollo-link-http";
 import { setContext } from "apollo-link-context";
 
-const cache = new InMemoryCache();
+import { split } from "apollo-link";
+import { WebSocketLink } from "apollo-link-ws";
+import { getMainDefinition } from "apollo-utilities";
+
+import App from "./App";
+
 const httpLink = new HttpLink({
 	uri: "http://localhost:4000/"
+});
+
+const wsLink = new WebSocketLink({
+	uri: `ws://localhost:4000/graphql`,
+	options: { reconnect: true }
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -22,9 +32,19 @@ const authLink = setContext((_, { headers }) => {
 	};
 });
 
+const cache = new InMemoryCache();
+const link = split(
+	({ query }) => {
+		const { kind, operation } = getMainDefinition(query);
+		return kind === "OperationDefinition" && operation === "subscription";
+	},
+	wsLink,
+	authLink.concat(httpLink)
+);
+
 const client = new ApolloClient({
 	cache,
-	link: authLink.concat(httpLink)
+	link
 });
 
 ReactDOM.render(

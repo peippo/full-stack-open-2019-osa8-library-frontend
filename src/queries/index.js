@@ -1,5 +1,17 @@
 import { gql } from "apollo-boost";
 
+const BOOK_DETAILS = gql`
+	fragment BookDetails on Book {
+		title
+		author {
+			name
+		}
+		published
+		id
+		genres
+	}
+`;
+
 export const ALL_AUTHORS = gql`
 	{
 		allAuthors {
@@ -14,15 +26,10 @@ export const ALL_AUTHORS = gql`
 export const ALL_BOOKS = gql`
 	{
 		allBooks {
-			title
-			author {
-				name
-			}
-			published
-			id
-			genres
+			...BookDetails
 		}
 	}
+	${BOOK_DETAILS}
 `;
 
 export const CURRENT_USER = gql`
@@ -32,6 +39,15 @@ export const CURRENT_USER = gql`
 			favoriteGenre
 		}
 	}
+`;
+
+export const BOOK_ADDED = gql`
+	subscription {
+		bookAdded {
+			...BookDetails
+		}
+	}
+	${BOOK_DETAILS}
 `;
 
 export const LOGIN = gql`
@@ -55,12 +71,10 @@ export const ADD_BOOK = gql`
 			author: $author
 			genres: $genres
 		) {
-			title
-			published
-			id
-			genres
+			...BookDetails
 		}
 	}
+	${BOOK_DETAILS}
 `;
 
 export const EDIT_AUTHOR = gql`
