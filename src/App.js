@@ -117,7 +117,7 @@ const App = () => {
 				result={allAuthors}
 				editAuthor={editAuthor}
 			/>
-			<Books show={page === "books"} result={allBooks} />
+			<Books show={page === "books"} />
 
 			{!token && (
 				<LoginForm

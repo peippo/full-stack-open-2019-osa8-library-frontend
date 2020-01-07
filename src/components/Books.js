@@ -1,22 +1,24 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useQuery } from "@apollo/react-hooks";
+import { ALL_BOOKS, ALL_GENRES } from "../queries";
 
-const Books = ({ result, show }) => {
-	const [genre, setGenre] = useState("");
+const Books = ({ show }) => {
+	const [variables, setVariables] = useState({});
+
+	const allGenres = useQuery(ALL_GENRES);
+	const { loading, data, refetch } = useQuery(ALL_BOOKS, {
+		variables
+	});
+
+	useEffect(() => {
+		refetch(variables);
+	}, [refetch, variables]);
 
 	if (!show) {
 		return null;
 	}
 
-	const uniqueGenres = [];
-	result.data.allBooks.forEach(book => {
-		book.genres.forEach(genre => {
-			if (!uniqueGenres.includes(genre)) {
-				uniqueGenres.push(genre);
-			}
-		});
-	});
-
-	if (result.loading) {
+	if (loading) {
 		return <div>loading...</div>;
 	} else {
 		return (
@@ -26,20 +28,22 @@ const Books = ({ result, show }) => {
 				<div>
 					Filter by genre:{" "}
 					<select
-						value={genre}
-						onChange={event => setGenre(event.target.value)}
+						value={variables.genre}
+						onChange={event =>
+							setVariables({ genre: event.target.value })
+						}
 					>
-						<option value="" disabled>
-							Select genre
-						</option>
-						{uniqueGenres.map((genre, index) => (
+						<option value="">Select genre</option>
+						{allGenres.data.allGenres.map((genre, index) => (
 							<option key={index} value={genre}>
 								{genre}
 							</option>
 						))}
 					</select>
-					{genre && (
-						<button onClick={() => setGenre("")}>Reset</button>
+					{variables.genre && (
+						<button onClick={() => setVariables({ genre: "" })}>
+							Reset
+						</button>
 					)}
 				</div>
 
@@ -50,18 +54,13 @@ const Books = ({ result, show }) => {
 							<th>author</th>
 							<th>published</th>
 						</tr>
-						{result.data.allBooks
-							.filter(
-								book =>
-									genre === "" || book.genres.includes(genre)
-							)
-							.map(book => (
-								<tr key={book.id}>
-									<td>{book.title}</td>
-									<td>{book.author?.name}</td>
-									<td>{book.published}</td>
-								</tr>
-							))}
+						{data.allBooks.map(book => (
+							<tr key={book.id}>
+								<td>{book.title}</td>
+								<td>{book.author?.name}</td>
+								<td>{book.published}</td>
+							</tr>
+						))}
 					</tbody>
 				</table>
 			</div>
